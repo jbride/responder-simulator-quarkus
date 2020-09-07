@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import com.redhat.emergency.response.responder.simulator.model.Coordinates;
 import com.redhat.emergency.response.responder.simulator.model.MissionStep;
 import com.redhat.emergency.response.responder.simulator.model.ResponderLocation;
+import com.redhat.emergency.response.responder.simulator.repository.ResponderLocationRepository;
 import io.quarkus.vertx.ConsumeEvent;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;

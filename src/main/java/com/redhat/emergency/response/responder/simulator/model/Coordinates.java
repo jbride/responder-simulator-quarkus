@@ -2,11 +2,15 @@ package com.redhat.emergency.response.responder.simulator.model;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Coordinates {
 
-    private final BigDecimal lat;
+    private BigDecimal lat;
 
-    private final BigDecimal lon;
+    private BigDecimal lon;
+
+    private Coordinates() {}
 
     public Coordinates(BigDecimal lat, BigDecimal lon) {
         this.lat = lat;
@@ -17,6 +21,7 @@ public class Coordinates {
         return lat;
     }
 
+    @JsonIgnore
     public double getLatD() {
         return lat.doubleValue();
     }
@@ -25,6 +30,7 @@ public class Coordinates {
         return lon;
     }
 
+    @JsonIgnore
     public double getLonD() {
         return lon.doubleValue();
     }

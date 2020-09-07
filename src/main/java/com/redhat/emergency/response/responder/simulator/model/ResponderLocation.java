@@ -4,6 +4,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.redhat.emergency.response.responder.simulator.DistanceHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,25 +13,31 @@ public class ResponderLocation {
 
     private static final Logger log = LoggerFactory.getLogger(ResponderLocation.class);
 
-    private final String missionId;
+    private String missionId;
 
-    private final String responderId;
+    private String responderId;
 
-    private final String incidentId;
+    private String incidentId;
 
-    private final Deque<MissionStep> queue;
+    @JsonProperty
+    private Deque<MissionStep> queue;
 
     private Coordinates currentPosition;
 
-    private final boolean person;
+    private boolean person;
 
+    @JsonProperty
     private boolean waiting = false;
 
-    private final double distanceUnit;
+    @JsonProperty
+    private double distanceUnit;
 
     public enum Status {CREATED, MOVING, WAITING, PICKEDUP, DROPPED};
 
     private Status status;
+
+    private ResponderLocation() {
+    }
 
     public ResponderLocation(String missionId, String responderId, String incidentId, List<MissionStep> missionSteps,
                              Coordinates currentPosition, boolean person, double distanceUnit) {

@@ -2,11 +2,13 @@ package com.redhat.emergency.response.responder.simulator.model;
 
 public class MissionStep {
 
-    private final Coordinates coordinates;
+    private Coordinates coordinates;
 
-    private final boolean wayPoint;
+    private boolean wayPoint;
 
-    private final boolean destination;
+    private boolean destination;
+
+    private MissionStep() {}
 
     public MissionStep(Coordinates coordinates, boolean wayPoint, boolean destination) {
         this.coordinates = coordinates;
