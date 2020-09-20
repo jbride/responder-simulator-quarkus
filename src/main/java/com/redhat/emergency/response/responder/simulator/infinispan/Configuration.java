@@ -1,4 +1,4 @@
-package com.redhat.emergency.response.responder.simulator.repository;
+package com.redhat.emergency.response.responder.simulator.infinispan;
 
 import org.infinispan.commons.configuration.BasicConfiguration;
 

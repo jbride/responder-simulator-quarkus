@@ -12,6 +12,8 @@ import static org.mockito.MockitoAnnotations.openMocks;
 
 import javax.inject.Inject;
 
+import com.redhat.emergency.response.responder.simulator.streams.KafkaResource;
+import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import io.vertx.core.json.JsonObject;
@@ -22,6 +24,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 
 @QuarkusTest
+@QuarkusTestResource(KafkaResource.class)
 public class MissionEventSourceTest {
 
     @InjectMock

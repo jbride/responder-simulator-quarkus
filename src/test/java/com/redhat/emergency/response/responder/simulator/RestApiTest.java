@@ -9,6 +9,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.openMocks;
 
+import com.redhat.emergency.response.responder.simulator.streams.KafkaResource;
+import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.mockito.InjectMock;
 import io.restassured.RestAssured;
@@ -20,6 +22,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 
 @QuarkusTest
+@QuarkusTestResource(KafkaResource.class)
 public class RestApiTest {
 
     @InjectMock
@@ -66,6 +69,4 @@ public class RestApiTest {
                 .statusCode(500);
         verify(simulator, never()).processResponderLocationStatus(any());
     }
-
-
 }
