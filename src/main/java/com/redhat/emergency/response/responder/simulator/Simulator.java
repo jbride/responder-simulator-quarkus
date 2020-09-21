@@ -3,7 +3,6 @@ package com.redhat.emergency.response.responder.simulator;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -12,6 +11,7 @@ import com.redhat.emergency.response.responder.simulator.model.Coordinates;
 import com.redhat.emergency.response.responder.simulator.model.MissionStep;
 import com.redhat.emergency.response.responder.simulator.model.ResponderLocation;
 import com.redhat.emergency.response.responder.simulator.repository.ResponderLocationRepository;
+import com.redhat.emergency.response.responder.simulator.streams.ResponderService;
 import io.quarkus.vertx.ConsumeEvent;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -42,9 +42,6 @@ public class Simulator {
 
     @ConfigProperty(name = "simulator.distance.base")
     double baseDistance;
-
-    @ConfigProperty(name = "simulator.distance.variation")
-    double distanceVariation;
 
     private final UnicastProcessor<Pair<String, ResponderLocation>> processor = UnicastProcessor.create();
 
@@ -127,20 +124,15 @@ public class Simulator {
 
 
     private Uni<ResponderLocation> toResponderLocation(JsonObject json) {
-        return responderService.isPerson(json.getString("responderId"))
-                .onItem().transform(person -> {
+        return responderService.responder(json.getString("responderId"))
+                .onItem().transform(responder -> {
                     List<MissionStep> steps = json.getJsonArray("steps").stream().map(o -> (JsonObject) o)
                             .map(j -> new MissionStep(new Coordinates(BigDecimal.valueOf(j.getDouble("lat")), BigDecimal.valueOf(j.getDouble("lon"))),
                                     j.getBoolean("wayPoint"), j.getBoolean("destination"))).collect(Collectors.toList());
                     Coordinates currentPosition = new Coordinates(BigDecimal.valueOf(json.getDouble("responderStartLat")),
                             BigDecimal.valueOf((json.getDouble("responderStartLong"))));
-                    return new ResponderLocation(json.getString("id"), json.getString("responderId"), json.getString("incidentId"), steps, currentPosition, person, distanceUnit());
+                    return new ResponderLocation(json.getString("id"), json.getString("responderId"), json.getString("incidentId"),
+                            steps, currentPosition, responder.getBoolean("person", false), responder.getDouble("distanceUnit", baseDistance));
                 });
-    }
-
-    private double distanceUnit() {
-        double max = baseDistance * (1 + distanceVariation);
-        double min = baseDistance * (1 - distanceVariation);
-        return ThreadLocalRandom.current().nextDouble(max - min) + min;
     }
 }

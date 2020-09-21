@@ -4,6 +4,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
+import com.redhat.emergency.response.responder.simulator.infinispan.Configuration;
 import com.redhat.emergency.response.responder.simulator.model.ResponderLocation;
 import io.quarkus.runtime.StartupEvent;
 import io.vertx.core.json.Json;
