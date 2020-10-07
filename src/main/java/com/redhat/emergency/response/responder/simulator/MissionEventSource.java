@@ -41,10 +41,10 @@ public class MissionEventSource {
             JsonObject json = new JsonObject(messageAsJson);
             String messageType = json.getString("messageType");
             if (Arrays.asList(ACCEPTED_MESSAGE_TYPES).contains(messageType) && json.getJsonObject("body") != null) {
-                log.info("Processing message: " + json.toString());
+                log.debug("Processing message: " + json.toString());
                 return json;
             }
-            log.info("Message with type '" + messageType + "' is ignored");
+            log.debug("Message with type '" + messageType + "' is ignored");
         } catch (Exception e) {
             log.warn("Unexpected message which is not JSON or without 'messageType' field.");
             log.warn("Message: " + messageAsJson);

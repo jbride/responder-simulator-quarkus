@@ -42,7 +42,6 @@ public class InfinispanKeyValueStore implements KeyValueStore<Bytes, byte[]> {
     void onStart(@Observes StartupEvent e) {
         // do not initialize the cache at startup when remote cache is not available, e.g. in QuarkusTests
         if (!lazy) {
-            log.info("Creating remote cache");
             cache = initCache();
         }
     }
@@ -54,7 +53,6 @@ public class InfinispanKeyValueStore implements KeyValueStore<Bytes, byte[]> {
         } else {
             getCache().putIfAbsent(key.get(), value);
         }
-
     }
 
     @Override
@@ -142,6 +140,7 @@ public class InfinispanKeyValueStore implements KeyValueStore<Bytes, byte[]> {
     }
 
     private RemoteCache<byte[], byte[]> initCache() {
+        log.info("Creating remote cache '" + storeName + "'");
         Configuration configuration = Configuration.builder().name(storeName).mode("SYNC").owners(2).build();
         return cacheManager.administration().getOrCreateCache(storeName, configuration);
     }

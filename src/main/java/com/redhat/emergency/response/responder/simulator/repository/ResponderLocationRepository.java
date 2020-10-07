@@ -33,7 +33,6 @@ public class ResponderLocationRepository {
     void onStart(@Observes StartupEvent e) {
         // do not initialize the cache at startup when remote cache is not available, e.g. in QuarkusTests
         if (!lazy) {
-            log.info("Creating remote cache");
             cache = initCache();
         }
     }
@@ -68,6 +67,7 @@ public class ResponderLocationRepository {
     }
 
     private RemoteCache<String, String> initCache() {
+        log.info("Creating remote cache '" + cacheName + "'");
         Configuration configuration = Configuration.builder().name(cacheName).mode("SYNC").owners(2).build();
         return cacheManager.administration().getOrCreateCache(cacheName, configuration);
     }

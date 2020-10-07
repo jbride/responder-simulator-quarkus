@@ -61,7 +61,7 @@ public class Simulator {
         String missionId = message.body().getString("missionId");
         String status = message.body().getString("status");
         if (ResponderLocation.Status.PICKEDUP.name().equalsIgnoreCase(status)) {
-            log.info("Processing responderlocation status update for ResponderLocation " + missionId);
+            log.debug("Processing responderlocation status update for ResponderLocation " + missionId);
             ResponderLocation responderLocation = repository.get(missionId);
             if (responderLocation == null) {
                 log.warn("ResponderLocation " + missionId + " not found in repository.");
