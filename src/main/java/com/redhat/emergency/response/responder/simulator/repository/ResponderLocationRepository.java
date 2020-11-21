@@ -7,6 +7,8 @@ import javax.inject.Inject;
 import com.redhat.emergency.response.responder.simulator.infinispan.Configuration;
 import com.redhat.emergency.response.responder.simulator.model.ResponderLocation;
 import io.quarkus.runtime.StartupEvent;
+import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.vertx.core.json.Json;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.infinispan.client.hotrod.RemoteCache;
@@ -48,6 +50,13 @@ public class ResponderLocationRepository {
             return null;
         }
         return Json.decodeValue(s, ResponderLocation.class);
+    }
+
+    public Uni<Void> clear() {
+        return Uni.createFrom().<Void>item(() -> {
+            getCache().clear();
+            return null;
+        }).runSubscriptionOn(Infrastructure.getDefaultWorkerPool());
     }
 
     public void remove(String key) {

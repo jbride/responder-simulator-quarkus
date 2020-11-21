@@ -26,7 +26,12 @@ public class RestApi {
             ex.response().setStatusCode(500).end();
             return;
         }
-        eventBus.request("simulator-reponderlocation-status", mission).subscribe().with(m -> ex.response().setStatusCode(200).end());
+        eventBus.request("simulator-responderlocation-status", mission).subscribe().with(m -> ex.response().setStatusCode(200).end());
+    }
+
+    @Route(path = "api/clear", methods = HttpMethod.POST)
+    void clear(RoutingExchange ex) {
+        eventBus.request("simulator-clear", new JsonObject()).subscribe().with(m -> ex.response().setStatusCode(200).end());
     }
 
 }

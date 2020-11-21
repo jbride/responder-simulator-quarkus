@@ -55,7 +55,7 @@ public class Simulator {
                 });
     }
 
-    @ConsumeEvent("simulator-reponderlocation-status")
+    @ConsumeEvent("simulator-responderlocation-status")
     public void processResponderLocationStatus(Message<JsonObject> message) {
         message.replyAndForget(new JsonObject());
         String missionId = message.body().getString("missionId");
@@ -72,7 +72,15 @@ public class Simulator {
             processor.onNext(new ImmutablePair<>(responderLocation.getResponderId(), responderLocation));
             waitForLocationUpdate(missionId);
         }
+    }
 
+    @ConsumeEvent("simulator-clear")
+    public void processClear(Message<JsonObject> message) {
+        log.info("Clearing the repository");
+        repository.clear().subscribe().with(unused -> message.replyAndForget(new JsonObject()), throwable -> {
+            log.error("Error while clearing the repository", throwable);
+            message.replyAndForget(new JsonObject());
+        });
     }
 
     @Outgoing("responder-location-update")
