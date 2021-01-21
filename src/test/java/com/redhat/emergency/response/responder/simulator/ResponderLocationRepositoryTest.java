@@ -58,12 +58,9 @@ public class ResponderLocationRepositoryTest {
         assertThat(stepJson2.getBoolean("destination"), equalTo(true));
         assertThat(stepJson2.getJsonObject("coordinates").getDouble("lat"), equalTo(40.12345));
         assertThat(stepJson2.getJsonObject("coordinates").getDouble("lon"), equalTo(-87.98765));
-
-
-        System.out.println(json);
-
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void testDecoding() throws Exception {
 

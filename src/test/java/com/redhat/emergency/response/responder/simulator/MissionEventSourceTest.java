@@ -96,6 +96,7 @@ public class MissionEventSourceTest {
         assertThat(message.acked(), is(true));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void testProcessMessageWhenNotMissionStartedEvent() {
         String payload = "{" +
@@ -138,6 +139,7 @@ public class MissionEventSourceTest {
         assertThat(message.acked(), is(true));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void testProcessMessageWhenUnexpectedMessage() {
         String payload = "test";
