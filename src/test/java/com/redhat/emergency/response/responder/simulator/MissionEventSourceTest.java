@@ -44,37 +44,31 @@ public class MissionEventSourceTest {
     @Test
     void testProcessMessage() {
         String payload = "{" +
-                "    \"id\": \"ef2c797d-a8b7-4b47-a50e-b38b682e92c7\"," +
-                "    \"invokingService\": \"MissionService\"," +
-                "    \"timestamp\": 1597697392063," +
-                "    \"messageType\": \"MissionStartedEvent\"," +
-                "    \"body\": {" +
-                "        \"id\": \"979a5f16-7421-41dd-bad5-26f405d693fe\"," +
-                "        \"incidentId\": \"incident236\"," +
-                "        \"responderId\": \"responder123\"," +
-                "        \"responderStartLat\": 34.18323," +
-                "        \"responderStartLong\": -77.90999," +
-                "        \"incidentLat\": 34.18408," +
-                "        \"incidentLong\": -77.84856," +
-                "        \"destinationLat\": 34.1706," +
-                "        \"destinationLong\": -77.949," +
-                "        \"responderLocationHistory\": []," +
-                "        \"status\": \"CREATED\"," +
-                "        \"steps\": [" +
-                "            {" +
-                "                \"lat\": 34.1827," +
-                "                \"lon\": -77.9106," +
-                "                \"wayPoint\": false," +
-                "                \"destination\": false" +
-                "            }," +
-                "            {" +
-                "                \"lat\": 34.1842," +
-                "                \"lon\": -77.9125," +
-                "                \"wayPoint\": false," +
-                "                \"destination\": false" +
-                "            }" +
-                "        ]" +
-                "    }" +
+                "    \"id\": \"979a5f16-7421-41dd-bad5-26f405d693fe\"," +
+                "    \"incidentId\": \"incident236\"," +
+                "    \"responderId\": \"responder123\"," +
+                "    \"responderStartLat\": 34.18323," +
+                "    \"responderStartLong\": -77.90999," +
+                "    \"incidentLat\": 34.18408," +
+                "    \"incidentLong\": -77.84856," +
+                "    \"destinationLat\": 34.1706," +
+                "    \"destinationLong\": -77.949," +
+                "    \"responderLocationHistory\": []," +
+                "    \"status\": \"CREATED\"," +
+                "    \"steps\": [" +
+                "       {" +
+                "            \"lat\": 34.1827," +
+                "            \"lon\": -77.9106," +
+                "            \"wayPoint\": false," +
+                "            \"destination\": false" +
+                "        }," +
+                "        {" +
+                "            \"lat\": 34.1842," +
+                "            \"lon\": -77.9125," +
+                "            \"wayPoint\": false," +
+                "            \"destination\": false" +
+                "        }" +
+                "    ]" +
                 "}";
 
         doAnswer(invocation -> {
@@ -83,7 +77,7 @@ public class MissionEventSourceTest {
             return null;
         }).when(simulator).processMissionCreated(any());
 
-        MessageWithAck<String> message = MessageWithAck.of(payload);
+        MessageWithAck<String> message = MessageWithAck.of(payload, "topic", 10, 20, true, "application/json", "MissionStartedEvent");
         missionEventSource.process(message).await().indefinitely();
         verify(simulator).processMissionCreated(messageCaptor.capture());
         Message<JsonObject> captured = messageCaptor.getValue();
@@ -100,40 +94,57 @@ public class MissionEventSourceTest {
     @Test
     void testProcessMessageWhenNotMissionStartedEvent() {
         String payload = "{" +
-                "    \"id\": \"ef2c797d-a8b7-4b47-a50e-b38b682e92c7\"," +
-                "    \"invokingService\": \"MissionService\"," +
-                "    \"timestamp\": 1597697392063," +
-                "    \"messageType\": \"MissionCompletedEvent\"," +
-                "    \"body\": {" +
-                "        \"id\": \"979a5f16-7421-41dd-bad5-26f405d693fe\"," +
-                "        \"incidentId\": \"incident236\"," +
-                "        \"responderId\": \"responder123\"," +
-                "        \"responderStartLat\": 34.18323," +
-                "        \"responderStartLong\": -77.90999," +
-                "        \"incidentLat\": 34.18408," +
-                "        \"incidentLong\": -77.84856," +
-                "        \"destinationLat\": 34.1706," +
-                "        \"destinationLong\": -77.949," +
-                "        \"responderLocationHistory\": []," +
-                "        \"status\": \"CREATED\"," +
-                "        \"steps\": [" +
-                "            {" +
-                "                \"lat\": 34.1827," +
-                "                \"lon\": -77.9106," +
-                "                \"wayPoint\": false," +
-                "                \"destination\": false" +
-                "            }," +
-                "            {" +
-                "                \"lat\": 34.1842," +
-                "                \"lon\": -77.9125," +
-                "                \"wayPoint\": false," +
-                "                \"destination\": false" +
-                "            }" +
-                "        ]" +
-                "    }" +
+                "    \"id\": \"979a5f16-7421-41dd-bad5-26f405d693fe\"," +
+                "    \"incidentId\": \"incident236\"," +
+                "    \"responderId\": \"responder123\"," +
+                "    \"responderStartLat\": 34.18323," +
+                "    \"responderStartLong\": -77.90999," +
+                "    \"incidentLat\": 34.18408," +
+                "    \"incidentLong\": -77.84856," +
+                "    \"destinationLat\": 34.1706," +
+                "    \"destinationLong\": -77.949," +
+                "    \"responderLocationHistory\": []," +
+                "    \"status\": \"CREATED\"," +
+                "    \"steps\": [" +
+                "        {" +
+                "            \"lat\": 34.1827," +
+                "            \"lon\": -77.9106," +
+                "            \"wayPoint\": false," +
+                "            \"destination\": false" +
+                "        }," +
+                "        {" +
+                "            \"lat\": 34.1842," +
+                "            \"lon\": -77.9125," +
+                "            \"wayPoint\": false," +
+                "            \"destination\": false" +
+                "        }" +
+                "    ]" +
                 "}";
 
-        MessageWithAck<String> message = MessageWithAck.of(payload);
+        MessageWithAck<String> message = MessageWithAck.of(payload, "topic", 10, 20, true, "application/json", "MissionCompletedEvent");
+        missionEventSource.process(message).await().indefinitely();
+        verify(simulator, never()).processMissionCreated(any(io.vertx.mutiny.core.eventbus.Message.class));
+        assertThat(message.acked(), is(true));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void testProcessMessageWrongDataContentType() {
+        String payload = "test";
+
+        MessageWithAck<String> message = MessageWithAck.of(payload, "topic", 10, 20, true, "application/avro", "MissionStartedEvent");
+        missionEventSource.process(message).await().indefinitely();
+        verify(simulator, never()).processMissionCreated(any(io.vertx.mutiny.core.eventbus.Message.class));
+        assertThat(message.acked(), is(true));
+    }
+
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void testProcessMessageNoDataContentType() {
+        String payload = "test";
+
+        MessageWithAck<String> message = MessageWithAck.of(payload, "topic", 10, 20, true, null, "MissionStartedEvent");
         missionEventSource.process(message).await().indefinitely();
         verify(simulator, never()).processMissionCreated(any(io.vertx.mutiny.core.eventbus.Message.class));
         assertThat(message.acked(), is(true));
@@ -144,7 +155,7 @@ public class MissionEventSourceTest {
     void testProcessMessageWhenUnexpectedMessage() {
         String payload = "test";
 
-        MessageWithAck<String> message = MessageWithAck.of(payload);
+        MessageWithAck<String> message = MessageWithAck.of(payload, "topic", 10, 20, true, "application/json", "MissionStartedEvent");
         missionEventSource.process(message).await().indefinitely();
         verify(simulator, never()).processMissionCreated(any(io.vertx.mutiny.core.eventbus.Message.class));
         assertThat(message.acked(), is(true));

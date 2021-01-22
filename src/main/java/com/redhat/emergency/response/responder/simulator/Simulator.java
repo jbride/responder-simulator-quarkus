@@ -2,6 +2,7 @@ package com.redhat.emergency.response.responder.simulator;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
@@ -16,6 +17,7 @@ import io.quarkus.vertx.ConsumeEvent;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.mutiny.operators.multi.processors.UnicastProcessor;
+import io.smallrye.reactive.messaging.ce.OutgoingCloudEventMetadata;
 import io.smallrye.reactive.messaging.kafka.KafkaRecord;
 import io.vertx.core.json.JsonObject;
 import io.vertx.mutiny.core.eventbus.Message;
@@ -99,7 +101,9 @@ public class Simulator {
                             || rl.getStatus().equals(ResponderLocation.Status.PICKEDUP))
                     .encode();
             log.debug("Sending message to responder-location-update channel. Key: " + p.getLeft() + " - Message: " + json);
-            return KafkaRecord.of(p.getLeft(), json);
+            OutgoingCloudEventMetadata<String> cloudEventMetadata = OutgoingCloudEventMetadata.<String>builder().withType("ResponderLocationUpdatedEvent")
+                    .withTimestamp(OffsetDateTime.now().toZonedDateTime()).build();
+            return KafkaRecord.of(p.getLeft(), json).addMetadata(cloudEventMetadata);
         });
 
     }

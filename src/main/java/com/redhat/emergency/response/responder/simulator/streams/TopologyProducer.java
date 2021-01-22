@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import com.redhat.emergency.response.responder.simulator.streams.infinispan.InfinispanKeyValueStoreSupplier;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -17,7 +18,9 @@ import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KeyValueMapper;
 import org.apache.kafka.streams.kstream.Materialized;
+import org.apache.kafka.streams.kstream.Transformer;
 import org.apache.kafka.streams.kstream.ValueMapper;
+import org.apache.kafka.streams.processor.ProcessorContext;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,16 +56,7 @@ public class TopologyProducer {
         StreamsBuilder builder = new StreamsBuilder();
 
         builder.stream(responderEventTopic, Consumed.with(Serdes.String(), Serdes.String()))
-                .mapValues(value -> {
-                    try {
-                        JsonObject json = new JsonObject(value);
-                        log.debug("Processing message: " + value);
-                        return json;
-                    } catch (Exception e) {
-                        log.warn("Unexpected message which is not a valid JSON object");
-                        return new JsonObject();
-                    }
-                })
+                .transform(ResponderEventTransformer::new)
                 .filter((key, value) -> {
                     String messageType = value.getString("messageType");
                     if (Arrays.asList(ACCEPTED_MESSAGE_TYPES).contains(messageType)) {
@@ -73,13 +67,13 @@ public class TopologyProducer {
                 })
                 .flatMapValues((ValueMapper<JsonObject, Iterable<JsonObject>>) value -> {
                     if (RESPONDERS_CREATED_EVENT.equals(value.getString("messageType"))) {
-                        JsonArray responders = value.getJsonObject("body").getJsonArray("responders");
+                        JsonArray responders = value.getJsonArray("responders");
                         return responders.stream().map(o -> (JsonObject)o).map(resp -> new JsonObject().put("action", ACTION_CREATE)
                                 .put("id", resp.getString("id"))
                                 .put("responder", resp.put("distanceUnit", distanceUnit())))
                                 .collect(Collectors.toList());
                     } else {
-                        JsonArray responderIds = value.getJsonObject("body").getJsonArray("responders");
+                        JsonArray responderIds = value.getJsonArray("responders");
                         return responderIds.stream().map(id -> new JsonObject().put("action", ACTION_DELETE)
                                 .put("id", id)).collect(Collectors.toList());
                     }
@@ -100,5 +94,53 @@ public class TopologyProducer {
         double max = baseDistance * (1 + distanceVariation);
         double min = baseDistance * (1 - distanceVariation);
         return ThreadLocalRandom.current().nextDouble(max - min) + min;
+    }
+
+    public static class ResponderEventTransformer implements Transformer<String, String, KeyValue<String, JsonObject>> {
+        private ProcessorContext context;
+
+        @Override
+        public void init(ProcessorContext context) {
+            this.context = context;
+        }
+
+        @Override
+        public KeyValue<String, JsonObject> transform(String key, String value) {
+            // check cloudevent specversion header
+            Header specVersion = context().headers().lastHeader("ce_specversion");
+            if (specVersion == null || !("1.0".equals(new String(specVersion.value())))) {
+                log.warn("Message is not a CloudEvent");
+                return new KeyValue<>(key, new JsonObject());
+            }
+            // check cloudevent datacontenttype header
+            Header dataContentType = context().headers().lastHeader("ce_datacontenttype");
+            if (dataContentType == null || !("application/json".equals(new String(dataContentType.value())))) {
+                log.warn("CloudEvent data content type header not set or not equal to application/json");
+                return new KeyValue<>(key, new JsonObject());
+            }
+            // check cloudevent type header
+            Header messageType = context().headers().lastHeader("ce_type");
+            if (messageType == null || messageType.value() == null || messageType.value().length == 0 ) {
+                log.warn("CloudEvent messageType not set");
+                return new KeyValue<>(key, new JsonObject());
+            }
+            try {
+                JsonObject jsonObject = new JsonObject(value);
+                log.debug("Processing message: " + value);
+                jsonObject.put("messageType", new String(messageType.value()));
+                return new KeyValue<>(key, jsonObject);
+            } catch (Exception e) {
+                log.warn("Unexpected message which is not a valid JSON object");
+                return new KeyValue<>(key, new JsonObject());
+            }
+        }
+
+        @Override
+        public void close() {
+        }
+
+        public ProcessorContext context() {
+            return context;
+        }
     }
 }
